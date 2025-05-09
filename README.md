@@ -38,3 +38,6 @@ Python microservices · CrewAI · LangChain · LangSmith · Docker · FastAPI ·
 * Seamless scaling to thousands of documents per week without performance degradation
 
 ## ⭐ Client Review
+
+<img width="914" alt="Screenshot 2025-05-09 at 13 12 03" src="https://github.com/user-attachments/assets/eec2f239-08fa-4baa-bdbe-ca6e40e152a2" />
+
