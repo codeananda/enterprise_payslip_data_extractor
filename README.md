@@ -1,5 +1,8 @@
 # 📈 Enterprise-Scale Structured Payslip Data Extraction
 
+![generated-image copy](https://github.com/user-attachments/assets/1b6dd690-afff-4bbf-95e6-e13e6c6cc6e6)
+
+
 ## 🎯 Problem Statement
 
 Manual mortgage document review was a bottleneck—error-prone, labour-intensive and unable to scale—delaying approval cycles and degrading customer experience.
