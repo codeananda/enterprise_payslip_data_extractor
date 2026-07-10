@@ -1,43 +1,84 @@
-# 📈 Enterprise-Scale Structured Payslip Data Extraction
+# Payslip extraction two models must agree on
 
-![generated-image copy](https://github.com/user-attachments/assets/1b6dd690-afff-4bbf-95e6-e13e6c6cc6e6)
+**A production microservice for a UK mortgage broker that reads a payslip PDF, extracts every line into a strictly typed schema, and has two frontier models cross-check each other before anything reaches a human.**
 
+![Cover](assets/cover.png)
 
-## 🎯 Problem Statement
+## At a glance
 
-Manual mortgage document review was a bottleneck—error-prone, labour-intensive and unable to scale—delaying approval cycles and degrading customer experience.
+| Value | What it is |
+|---|---|
+| 52% | Fewer processing errors |
+| 80% | Less manual review |
+| 15% | Faster mortgage approvals |
+| 1000s | Documents weekly |
 
-Led the design and delivery of a mission-critical document processing system for a financial services client, automating mortgage approvals and driving operational excellence with advanced ML.
+## The situation
 
-## ⚙️ Technical Approach
+A UK mortgage broker processed thousands of payslips a week, and every one crossed a human desk. Staff read each document line by line — gross pay, tax, National Insurance, pension, the lot — and keyed the figures into the approval system by hand.
 
-* Modular Python microservices orchestrated by CrewAI for specialised cognitive tasks  
-* LangSmith integration for real-time monitoring, tracing and alerting  
-* RESTful APIs with FastAPI; dependency management via Poetry  
-* Containerised deployments on Docker and AWS for resilience and scalability  
-* Dual-LLM verification pipeline to cross-validate extracted data
+Affordability decisions rested on that data, so it had to be right; but manual keying is slow and error-prone, and the review queue sat squarely in the critical path of every mortgage approval.
 
-## 🛠 Skills
+The brief was to take the keying out of the loop without taking the rigour out. A lending decision cannot rest on an unvalidated model guess, so "mostly right JSON" was never going to be acceptable. The service had to return data the broker's systems could trust — or say plainly that it couldn't.
 
-Python microservices · CrewAI · LangChain · LangSmith · Docker · FastAPI · Poetry · Pydantic · AWS · multi-agent AI · dual-LLM verification · observability · OpenAI · Google Vertex AI
+## What I built
 
-## 🔧 Challenges & Solutions
+The result is a FastAPI microservice — Dockerised, deployed on AWS — that accepts a payslip over a single endpoint and returns validated, structured JSON. Multi-page PDFs are stitched into one tall image so the vision models see the whole document at once, with nothing lost between pages. Two frontier models — Claude 3.5 Sonnet and GPT-4o — extract independently and cross-validate each other, and everything lands in a Pydantic schema with 19 typed payslip line categories, so a mislabelled deduction fails loudly instead of slipping through.
 
-* Format diversity (PDF, PNG, DOCX): built a unified preprocessor and scalable image pipeline  
-* Ensuring data integrity: implemented multi-LLM model consensus and enforced consistent, structured outputs with Pydantic schemas  
-* Pipeline resilience: added retry logic and fault-tolerant workflows  
-* Observability & error handling: centralised logs, Slack webhooks and LangSmith dashboards  
-* Edge-case handling: developed adaptive learning modules for atypical document layouts
+| Step | What happens |
+|---|---|
+| Payslip in | PDF over the API, from the broker's document platform |
+| Stitched | Multi-page PDFs merged into one image for the vision models |
+| Dual extraction | Claude 3.5 Sonnet and GPT-4o cross-validate each other |
+| Validated JSON | Pydantic schema, 19 line categories, deterministic safety nets |
 
-## 📊 Quantifiable Business Impact
+Around the models sits ordinary engineering discipline: deterministic post-processing that corrects the mistakes LLMs predictably make, retries on every model call, LangSmith tracing on every request, and Slack alerts when something needs a human. Quality was measured with an evaluation harness built for the job — model output scored by the exact number of edits a human reviewer would need to reach ground truth, which maps directly onto the reviewer labour the client was paying for.
 
-* 52% reduction in processing errors  
-* 15% faster mortgage approval times  
-* 80% decrease in manual review overhead  
-* Sustained data-accuracy gains via dual-LLM validation  
-* Seamless scaling to thousands of documents per week without performance degradation
+## The hard parts
 
-## ⭐ Client Review
+### A mortgage cannot rest on a guess
 
-<img width="914" alt="Screenshot 2025-05-09 at 13 12 03" src="https://github.com/user-attachments/assets/eec2f239-08fa-4baa-bdbe-ca6e40e152a2" />
+One model reading a payslip is an opinion; two agreeing is evidence. Claude 3.5 Sonnet and GPT-4o extract independently and cross-validate, with Pydantic validators enforcing the schema at the API boundary. Disagreements are surfaced for review, not quietly resolved.
 
+### "Better" measured in human edits
+
+Accuracy percentages hide what matters, so the harness counts the edits a reviewer needs to fix each extraction — one per wrong value, more for missing lines — with an LLM-as-judge pass so "Salary" and "Basic pay" aren't marked as errors. Every change was scored against baseline before shipping.
+
+### Models make predictable mistakes
+
+Vision models kept filing Tax and NI as deductions to sum, misreading negative adjustments and mangling name casing. A deterministic post-processing layer corrects each quirk in plain code — safety nets that hold regardless of which model sits behind them.
+
+### Architecture chosen by benchmark, not fashion
+
+I built two full implementations — a LangChain single-chain extractor and a CrewAI multi-agent crew — and ran both through the same edit-count harness on real payslips. The evidence picked the winner; the client got the comparison, not just the conclusion.
+
+## Results
+
+| Metric | Outcome |
+|---|---|
+| Processing errors | Down 52% against the previous manual process |
+| Manual review | Down 80% — most payslips no longer need a human pass |
+| Approval speed | Mortgage approvals 15% faster end to end |
+| In production | Thousands of documents weekly; client anonymised under NDA |
+
+## What the client said
+
+> "Adam worked on an AI project with us and quickly demonstrated good technical skills, producing logical and well-structured code… he showed a strong commitment to delivering measurable results and consistently approached his work with a high level of professionalism. … He would be a valuable asset to any development team."
+
+— Upwork client review, Senior Machine Learning Engineer engagement · 4.9★ · $12,212.50 · 163 hours
+
+## The full case study
+
+A designed PDF version of this case study is in this repo: [06-payslip-extraction.pdf](06-payslip-extraction.pdf).
+
+![Page 2](assets/page-2.png)
+![Page 3](assets/page-3.png)
+
+---
+
+## About Adam
+
+Freelance AI engineer — Expert-Vetted on Upwork (top 1%), 100% Job Success over 70+ projects, $400K+ earned, 5,750+ hours billed. I build production LLM systems for regulated industries: insurance, finance, law.
+
+- [Upwork profile](https://www.upwork.com/freelancers/~01153ca9fd0099730e)
+- [GitHub](https://github.com/codeananda)
