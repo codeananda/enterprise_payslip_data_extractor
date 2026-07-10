@@ -34,15 +34,15 @@ The result is a FastAPI microservice — Dockerised, deployed on AWS — that ac
 
 Around the models sits ordinary engineering discipline: deterministic post-processing that corrects the mistakes LLMs predictably make, retries on every model call, LangSmith tracing on every request, and Slack alerts when something needs a human. Quality was measured with an evaluation harness built for the job — model output scored by the exact number of edits a human reviewer would need to reach ground truth, which maps directly onto the reviewer labour the client was paying for.
 
-## The hard parts
+## The hard parts: what it takes to trust an LLM with lending data
 
 ### A mortgage cannot rest on a guess
 
-One model reading a payslip is an opinion; two agreeing is evidence. Claude 3.5 Sonnet and GPT-4o extract independently and cross-validate, with Pydantic validators enforcing the schema at the API boundary. Disagreements are surfaced for review, not quietly resolved.
+One model reading a payslip is an opinion; two agreeing is evidence. Claude 3.5 Sonnet and GPT-4o extract independently and cross-validate, with Pydantic validators enforcing the schema at the API boundary. Disagreements trigger a Slack alert rather than being quietly resolved.
 
 ### "Better" measured in human edits
 
-Accuracy percentages hide what matters, so the harness counts the edits a reviewer needs to fix each extraction — one per wrong value, more for missing lines — with an LLM-as-judge pass so "Salary" and "Basic pay" aren't marked as errors. Every change was scored against baseline before shipping.
+Accuracy percentages hide what matters, so the harness counts the edits a reviewer needs to fix each extraction — one per wrong value, more for missing lines — with an LLM-as-judge pass so "Salary" and "Basic pay" aren't marked as errors. Changes were scored against baseline before shipping.
 
 ### Models make predictable mistakes
 
@@ -56,9 +56,9 @@ I built two full implementations — a LangChain single-chain extractor and a Cr
 
 | Metric | Outcome |
 |---|---|
-| Processing errors | Down 52% against the previous manual process |
-| Manual review | Down 80% — most payslips no longer need a human pass |
-| Approval speed | Mortgage approvals 15% faster end to end |
+| Processing errors | Down 52% |
+| Manual review | Down 80% |
+| Approval speed | Mortgage approvals 15% faster |
 | In production | Thousands of documents weekly; client anonymised under NDA |
 
 ## What the client said
